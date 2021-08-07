@@ -11,7 +11,7 @@ This __app__ help alfresco developper to export all folder structure
 Usage:
 
 ```bash
-python main.py [-h] -sn SERVICENAME [-hn HOSTNAME][-rf root_folder] [-bsf BASE_STORAGE_FOLDER] [-u username] [-p PASSWORD] -o OUTPUT
+python main.py [-h] -sn SERVICENAME [-hn HOSTNAME] [-rf root_folder] [-bsf BASE_STORAGE_FOLDER] [-u username] [-p PASSWORD] -o OUTPUT
 ```
 
 ## Arguments
@@ -32,4 +32,3 @@ Storage path for local system
 
 __SERVICENAME__ : Is endpoint you want to crawl
 __ROOT_FOLDER__ : Is base endpoint
-
