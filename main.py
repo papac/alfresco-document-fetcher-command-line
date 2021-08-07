@@ -1,13 +1,8 @@
 import argparse
-import re
-import os
-import sys
-
-import os
 import requests
 import base64
 import csv
-
+import ftfy
 
 class FirstDispatcher():
 
@@ -41,6 +36,9 @@ class FirstDispatcher():
 
     def node_hierachy(self, al_folders):
         nodes = []
+        if al_folders is None:
+            return nodes
+
         for item in al_folders["objects"]:
             node = None
             path = None
@@ -77,7 +75,7 @@ class FirstDispatcher():
         if len(response['objects']) > 0:
             if isFolder:
                 out = {"name": name,  "url": base_url, "id": object_id,
-                       "title": title, "is_folder": 1}
+                       "title": self.convert_iso_name_to_string(title), "is_folder": 1}
                 self.save_base_folder(out)
             nodes = self.isFolders(response, base_url, name)
             if nodes:
@@ -113,13 +111,17 @@ class FirstDispatcher():
             #'name', 'url', 'id', 'filetype'
             output = {}
             if isFolder:
-                nodes.append({"title": title, "path": base_url + "/" +
-                              node, "is_folder": isFolder, "name": node, "object_id": object_id})
+                nodes.append({
+                    "title": title,
+                    "path": base_url + "/" + node,
+                    "is_folder": isFolder,
+                    "name": node,
+                    "object_id": object_id
+                })
 
                 path = base_url + "/" + node
                 output = {"name": node,  "url": path, "id": object_id,
                           "title": title, "is_folder": 1}
-
             else:
                 path = base_url + "/" + node
                 output = {"name": node,  "url": path, "id": object_id,
@@ -144,6 +146,11 @@ class FirstDispatcher():
     def build_url(self, path):
         return self.base_folder_url.format(self.args.hostname, path)
 
+    def convert_iso_name_to_string(name):
+        result = []
+        for word in name.split():
+            result.append(ftfy.fix_text(word))
+        return ' '.join(result)
 
 def arg_parser():
     parser = argparse.ArgumentParser()
