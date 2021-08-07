@@ -4,7 +4,7 @@ import base64
 import csv
 import ftfy
 
-class FirstDispatcher():
+class AlfrescoObjectFetcher():
 
     def __init__(self, args):
         self.base_folder_url = "{}/alfresco/api/-default-/public/cmis/versions/1.1/browser/root/{}"
@@ -74,7 +74,7 @@ class FirstDispatcher():
         response = self.get_root_node_children(base_url)
         if len(response['objects']) > 0:
             if isFolder:
-                out = {"name": name,  "url": base_url, "id": object_id,
+                out = {"name":  self.convert_iso_name_to_string(name),  "url": base_url, "id": object_id,
                        "title": self.convert_iso_name_to_string(title), "is_folder": 1}
                 self.save_base_folder(out)
             nodes = self.isFolders(response, base_url, name)
@@ -82,7 +82,13 @@ class FirstDispatcher():
                 for node in nodes:
                     if node['is_folder']:
                         self.recursive_folder_loader(
-                            node['path'], node['path'], True, node['object_id'], node['title'], node['is_folder'])
+                            self.convert_iso_name_to_string(node['path']),
+                            self.convert_iso_name_to_string(node['path']),
+                            True,
+                            node['object_id'],
+                            self.convert_iso_name_to_string(node['title']),
+                            node['is_folder']
+                        )
         else:
             output = {"name": name,  "url": base_url, "id": object_id,
                       "title": title, "is_folder": 1}
@@ -92,7 +98,7 @@ class FirstDispatcher():
         nodes = []
         for item in folders["objects"]:
             isFolder = False
-            node = None
+            name = None
             path = None
             object_id = None
             title = None
@@ -101,30 +107,30 @@ class FirstDispatcher():
                     if item["object"]["properties"][it]['value'] == "cmis:folder":
                         isFolder = True
                 if it == "cmis:name":
-                    node = item["object"]["properties"][it]['value']
+                    name = self.convert_iso_name_to_string(item["object"]["properties"][it]['value'])
                 if it == "cmis:path":
                     path = item["object"]["properties"][it]['value']
                 if it == "cmis:objectId":
                     object_id = item["object"]["properties"][it]['value']
                 if it == "cm:title":
-                    title = item["object"]["properties"][it]['value']
+                    title = self.convert_iso_name_to_string(item["object"]["properties"][it]['value'])
             #'name', 'url', 'id', 'filetype'
             output = {}
             if isFolder:
                 nodes.append({
                     "title": title,
-                    "path": base_url + "/" + node,
+                    "path": base_url + "/" + name,
                     "is_folder": isFolder,
-                    "name": node,
+                    "name": name,
                     "object_id": object_id
                 })
 
-                path = base_url + "/" + node
-                output = {"name": node,  "url": path, "id": object_id,
+                path = base_url + "/" + name
+                output = {"name": name,  "url": path, "id": object_id,
                           "title": title, "is_folder": 1}
             else:
-                path = base_url + "/" + node
-                output = {"name": node,  "url": path, "id": object_id,
+                path = base_url + "/" + name
+                output = {"name": name,  "url": path, "id": object_id,
                           "title": title, "is_folder": 0}
 
             self.output.writerow(output)
@@ -141,12 +147,20 @@ class FirstDispatcher():
         nodes = self.node_hierachy(self.get_root_node_children(url))
         for node in nodes:
             self.recursive_folder_loader(
-                node["path"][1:], node["name"], False, node['object_id'], node['title'], node['is_folder'])
+                self.convert_iso_name_to_string(node["path"][1:]),
+                self.convert_iso_name_to_string(node["name"]),
+                False,
+                node['object_id'],
+                self.convert_iso_name_to_string(node['title']),
+                node['is_folder']
+            )
 
     def build_url(self, path):
         return self.base_folder_url.format(self.args.hostname, path)
 
-    def convert_iso_name_to_string(name):
+    def convert_iso_name_to_string(self, name):
+        if name is None:
+            return ""
         result = []
         for word in name.split():
             result.append(ftfy.fix_text(word))
@@ -167,6 +181,5 @@ def arg_parser():
 
     return args
 
-
 if __name__ == "__main__":
-    FirstDispatcher(arg_parser())
+    AlfrescoObjectFetcher(arg_parser())

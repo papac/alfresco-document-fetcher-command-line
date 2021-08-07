@@ -1,2 +1,2 @@
-ftfy
+ftfy=6.0
 requests
