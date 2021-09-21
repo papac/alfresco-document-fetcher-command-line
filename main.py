@@ -2,7 +2,7 @@ import argparse
 import requests
 import base64
 import csv
-import ftfy
+# import ftfy
 
 class AlfrescoObjectFetcher():
 
@@ -158,13 +158,15 @@ class AlfrescoObjectFetcher():
     def build_url(self, path):
         return self.base_folder_url.format(self.args.hostname, path)
 
-    def convert_iso_name_to_string(self, name):
-        if name is None:
-            return ""
-        result = []
-        for word in name.split():
-            result.append(ftfy.fix_text(word))
-        return ' '.join(result)
+    def convert_iso_name_to_string(self, str):
+        return str
+        # if name is None:
+        #     return ""
+        # result = []
+        # for word in name.split():
+        #     # result.append(ftfy.fix_text(word))
+        #     result.append(word)
+        # return ' '.join(result)
 
 def arg_parser():
     parser = argparse.ArgumentParser()
